@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Bill</h2>
+
+<table class="table">
+  <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+  <tbody>
+    {% for item in cart %}
+    <tr>
+      <td>{{ item.name }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>₹{{ item.price }}</td>
+      <td>₹{{ item.price * item.quantity }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+      <td colspan="3"><strong>Total</strong></td>
+      <td><strong>₹{{ total }}</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<button onclick="window.print()" class="btn btn-primary">Print Bill</button>
+
+<hr>
+
+
+
+{% endblock %}

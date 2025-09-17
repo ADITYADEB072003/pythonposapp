@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Sales History</h2>
+
+<form method="GET" class="row g-3 mb-3">
+  <div class="col-auto">
+    <input type="date" name="start" value="{{ start }}" class="form-control" placeholder="Start Date">
+  </div>
+  <div class="col-auto">
+    <input type="date" name="end" value="{{ end }}" class="form-control" placeholder="End Date">
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary">Filter</button>
+  </div>
+</form>
+
+<!-- <img src="image/png;base64,{{ chart_data }}" alt="Sales Chart" class="img-fluid mb-4"/> -->
+
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Item</th>
+      <th>Quantity</th>
+      <th>Price (₹)</th>
+      <th>Total (₹)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sale in sales %}
+    <tr>
+      <td>{{ sale.date.strftime('%Y-%m-%d %H:%M:%S') if sale.date else 'N/A' }}</td>
+      <td>{{ sale.name }}</td>
+      <td>{{ sale.quantity }}</td>
+      <td>{{ sale.price }}</td>
+      <td>{{ sale.price * sale.quantity }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
