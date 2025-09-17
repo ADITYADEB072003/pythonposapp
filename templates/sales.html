@@ -1,42 +1,971 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Sales History</h2>
-
-<form method="GET" class="row g-3 mb-3">
-  <div class="col-auto">
-    <input type="date" name="start" value="{{ start }}" class="form-control" placeholder="Start Date">
+<div class="container-fluid py-2 py-md-4">
+  <!-- Page Header -->
+  <div class="row mb-3 mb-md-4">
+    <div class="col-12">
+      <div class="card bg-gradient-primary text-white shadow">
+        <div class="card-body p-3 p-md-4">
+          <div class="d-flex align-items-center flex-column flex-sm-row text-center text-sm-start">
+            <div class="icon-responsive bg-white bg-opacity-20 rounded-3 mb-3 mb-sm-0 me-sm-3 d-flex align-items-center justify-content-center">
+              <i class="fas fa-chart-line fa-lg fa-md-2x"></i>
+            </div>
+            <div>
+              <h2 class="mb-1 mb-md-0 text-white fs-4 fs-md-2">Sales History</h2>
+              <p class="mb-0 text-white-75 small">Track and analyze your sales performance</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col-auto">
-    <input type="date" name="end" value="{{ end }}" class="form-control" placeholder="End Date">
+
+  <!-- Mobile Optimized Filter Section -->
+  <div class="row mb-3 mb-md-4">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-0 pb-2">
+          <div class="d-flex align-items-center justify-content-between">
+            <h5 class="mb-0 text-muted fs-6 fs-md-5">
+              <i class="fas fa-filter me-2"></i>Filter Sales Data
+            </h5>
+            <button class="btn btn-sm btn-outline-primary d-md-none" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+              <i class="fas fa-sliders-h"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body pt-2">
+          <div class="collapse show" id="filterCollapse">
+            <form method="GET" class="row g-2 g-md-3 align-items-end">
+              <div class="col-12 col-sm-6 col-lg-3">
+                <label for="start-date" class="form-label fw-semibold small">Start Date</label>
+                <input type="date" name="start" id="start-date" value="{{ start }}" 
+                       class="form-control border-2">
+              </div>
+              <div class="col-12 col-sm-6 col-lg-3">
+                <label for="end-date" class="form-label fw-semibold small">End Date</label>
+                <input type="date" name="end" id="end-date" value="{{ end }}" 
+                       class="form-control border-2">
+              </div>
+              <div class="col-6 col-sm-4 col-lg-2">
+                <button type="submit" class="btn btn-primary w-100 shadow-sm">
+                  <i class="fas fa-search me-1 d-none d-sm-inline"></i>
+                  <span class="d-none d-sm-inline">Filter</span>
+                  <span class="d-sm-none">Go</span>
+                </button>
+              </div>
+              <div class="col-6 col-sm-4 col-lg-2">
+                <button type="button" id="groupByDay" class="btn btn-outline-secondary w-100">
+                  <i class="fas fa-calendar-day me-1 d-none d-sm-inline"></i>
+                  <span class="d-none d-sm-inline">Group</span>
+                  <span class="d-sm-none">Day</span>
+                </button>
+              </div>
+              <div class="col-12 col-sm-4 col-lg-2">
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-2 d-none d-sm-flex">
+                    <i class="fas fa-search text-muted"></i>
+                  </span>
+                  <input type="text" id="searchInput" class="form-control border-2" 
+                         placeholder="Search...">
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col-auto">
-    <button class="btn btn-primary">Filter</button>
+
+  <!-- Responsive Summary Cards -->
+  <div class="row mb-3 mb-md-4 g-2 g-md-3">
+    <div class="col-6 col-lg-3">
+      <div class="card bg-success text-white shadow-sm h-100">
+        <div class="card-body p-2 p-md-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="flex-grow-1">
+              <h6 class="text-white-75 mb-1 small">Total Sales</h6>
+              <h4 class="mb-0 fs-6 fs-md-4" id="totalSales">₹0</h4>
+            </div>
+            <div class="ms-2">
+              <i class="fas fa-rupee-sign fa-lg opacity-75"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card bg-info text-white shadow-sm h-100">
+        <div class="card-body p-2 p-md-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="flex-grow-1">
+              <h6 class="text-white-75 mb-1 small">Total Items</h6>
+              <h4 class="mb-0 fs-6 fs-md-4" id="totalItems">0</h4>
+            </div>
+            <div class="ms-2">
+              <i class="fas fa-shopping-cart fa-lg opacity-75"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card bg-warning text-white shadow-sm h-100">
+        <div class="card-body p-2 p-md-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="flex-grow-1">
+              <h6 class="text-white-75 mb-1 small">Avg Sale</h6>
+              <h4 class="mb-0 fs-6 fs-md-4" id="avgSale">₹0</h4>
+            </div>
+            <div class="ms-2">
+              <i class="fas fa-chart-bar fa-lg opacity-75"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card bg-dark text-white shadow-sm h-100">
+        <div class="card-body p-2 p-md-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="flex-grow-1">
+              <h6 class="text-white-75 mb-1 small">Transactions</h6>
+              <h4 class="mb-0 fs-6 fs-md-4" id="totalTransactions">0</h4>
+            </div>
+            <div class="ms-2">
+              <i class="fas fa-receipt fa-lg opacity-75"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</form>
 
-<!-- <img src="image/png;base64,{{ chart_data }}" alt="Sales Chart" class="img-fluid mb-4"/> -->
+  <!-- Mobile-First Sales Table -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow border-0">
+        <div class="card-header bg-white border-0 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+          <h5 class="mb-0 text-muted fs-6 fs-md-5">
+            <i class="fas fa-table me-2"></i>Sales Transactions
+          </h5>
+          <div class="d-flex gap-1 gap-md-2 flex-wrap">
+            <button class="btn btn-outline-primary btn-sm" onclick="exportToCSV()">
+              <i class="fas fa-download me-1 d-none d-sm-inline"></i>
+              <span class="d-none d-sm-inline">Export</span>
+              <i class="fas fa-download d-sm-none"></i>
+            </button>
+            <button class="btn btn-outline-secondary btn-sm d-none d-md-inline-block" onclick="printTable()">
+              <i class="fas fa-print me-1"></i>Print
+            </button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          
+          <!-- Desktop Table View -->
+          <div class="d-none d-lg-block">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0" id="salesTable">
+                <thead class="table-light sticky-top">
+                  <tr>
+                    <th class="border-0 fw-bold text-muted sortable" data-column="date">
+                      <i class="fas fa-calendar me-2"></i>Date
+                      <i class="fas fa-sort float-end mt-1"></i>
+                    </th>
+                    <th class="border-0 fw-bold text-muted sortable" data-column="item">
+                      <i class="fas fa-box me-2"></i>Item
+                      <i class="fas fa-sort float-end mt-1"></i>
+                    </th>
+                    <th class="border-0 fw-bold text-muted text-center sortable" data-column="quantity">
+                      <i class="fas fa-hashtag me-2"></i>Qty
+                      <i class="fas fa-sort float-end mt-1"></i>
+                    </th>
+                    <th class="border-0 fw-bold text-muted text-end sortable" data-column="price">
+                      <i class="fas fa-tag me-2"></i>Price
+                      <i class="fas fa-sort float-end mt-1"></i>
+                    </th>
+                    <th class="border-0 fw-bold text-muted text-end sortable" data-column="total">
+                      <i class="fas fa-calculator me-2"></i>Total
+                      <i class="fas fa-sort float-end mt-1"></i>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="salesTableBody">
+                  {% for sale in sales %}
+                  <tr class="sale-row" data-date="{{ sale.date.strftime('%Y-%m-%d') if sale.date else '' }}">
+                    <td class="border-0 py-3">
+                      <div class="d-flex flex-column">
+                        <span class="fw-semibold text-dark">
+                          {{ sale.date.strftime('%d %b, %Y') if sale.date else 'N/A' }}
+                        </span>
+                        <small class="text-muted">
+                          {{ sale.date.strftime('%I:%M %p') if sale.date else '' }}
+                        </small>
+                      </div>
+                    </td>
+                    <td class="border-0 py-3">
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                          <i class="fas fa-cube text-primary"></i>
+                        </div>
+                        <span class="fw-medium">{{ sale.name }}</span>
+                      </div>
+                    </td>
+                    <td class="border-0 py-3 text-center">
+                      <span class="badge bg-light text-dark fs-6 px-3 py-2">{{ sale.quantity }}</span>
+                    </td>
+                    <td class="border-0 py-3 text-end">
+                      <span class="text-muted">₹</span><span class="fw-semibold">{{ sale.price }}</span>
+                    </td>
+                    <td class="border-0 py-3 text-end">
+                      <span class="fw-bold text-success fs-5">₹{{ sale.price * sale.quantity }}</span>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
+          <!-- Tablet View -->
+          <div class="d-none d-md-block d-lg-none">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0" id="salesTableTablet">
+                <thead class="table-light sticky-top">
+                  <tr>
+                    <th class="border-0 fw-bold text-muted small">Date/Item</th>
+                    <th class="border-0 fw-bold text-muted text-center small">Qty</th>
+                    <th class="border-0 fw-bold text-muted text-end small">Price</th>
+                    <th class="border-0 fw-bold text-muted text-end small">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for sale in sales %}
+                  <tr class="sale-row-tablet" data-date="{{ sale.date.strftime('%Y-%m-%d') if sale.date else '' }}">
+                    <td class="border-0 py-2">
+                      <div class="d-flex flex-column">
+                        <span class="fw-semibold text-dark small">{{ sale.name }}</span>
+                        <small class="text-muted">
+                          {{ sale.date.strftime('%d %b %Y, %I:%M %p') if sale.date else 'N/A' }}
+                        </small>
+                      </div>
+                    </td>
+                    <td class="border-0 py-2 text-center">
+                      <span class="badge bg-light text-dark">{{ sale.quantity }}</span>
+                    </td>
+                    <td class="border-0 py-2 text-end">
+                      <span class="fw-semibold small">₹{{ sale.price }}</span>
+                    </td>
+                    <td class="border-0 py-2 text-end">
+                      <span class="fw-bold text-success">₹{{ sale.price * sale.quantity }}</span>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Item</th>
-      <th>Quantity</th>
-      <th>Price (₹)</th>
-      <th>Total (₹)</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for sale in sales %}
-    <tr>
-      <td>{{ sale.date.strftime('%Y-%m-%d %H:%M:%S') if sale.date else 'N/A' }}</td>
-      <td>{{ sale.name }}</td>
-      <td>{{ sale.quantity }}</td>
-      <td>{{ sale.price }}</td>
-      <td>{{ sale.price * sale.quantity }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+          <!-- Mobile Card View -->
+          <div class="d-md-none" id="mobileView">
+            {% for sale in sales %}
+            <div class="mobile-sale-card border-bottom p-3" data-date="{{ sale.date.strftime('%Y-%m-%d') if sale.date else '' }}">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="flex-grow-1">
+                  <div class="d-flex align-items-center mb-1">
+                    <div class="bg-primary bg-opacity-10 rounded-circle p-1 me-2">
+                      <i class="fas fa-cube text-primary small"></i>
+                    </div>
+                    <span class="fw-semibold">{{ sale.name }}</span>
+                  </div>
+                  <small class="text-muted">
+                    {{ sale.date.strftime('%d %b %Y, %I:%M %p') if sale.date else 'N/A' }}
+                  </small>
+                </div>
+                <div class="text-end">
+                  <div class="fw-bold text-success fs-6">₹{{ sale.price * sale.quantity }}</div>
+                </div>
+              </div>
+              <div class="row text-center">
+                <div class="col-4">
+                  <small class="text-muted d-block">Quantity</small>
+                  <span class="badge bg-light text-dark">{{ sale.quantity }}</span>
+                </div>
+                <div class="col-4">
+                  <small class="text-muted d-block">Unit Price</small>
+                  <span class="small fw-medium">₹{{ sale.price }}</span>
+                </div>
+                <div class="col-4">
+                  <small class="text-muted d-block">Total</small>
+                  <span class="small fw-bold text-success">₹{{ sale.price * sale.quantity }}</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile-Optimized Day-wise Grouped View -->
+<div id="dayWiseView" class="container-fluid py-2 py-md-4" style="display: none;">
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow border-0">
+        <div class="card-header bg-white border-0 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+          <h5 class="mb-0 text-muted fs-6 fs-md-5">
+            <i class="fas fa-calendar-day me-2"></i>Day-wise Sales Summary
+          </h5>
+          <button class="btn btn-outline-secondary btn-sm" onclick="toggleView()">
+            <i class="fas fa-list me-1"></i>
+            <span class="d-none d-sm-inline">Show All Sales</span>
+            <span class="d-sm-none">All Sales</span>
+          </button>
+        </div>
+        <div class="card-body p-0">
+          <div id="dayWiseContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Responsive Enhancements */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.icon-responsive {
+  width: 50px;
+  height: 50px;
+}
+
+@media (min-width: 768px) {
+  .icon-responsive {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.sortable:hover {
+  background-color: #f8f9fa !important;
+}
+
+.card {
+  border-radius: 10px;
+  transition: transform 0.2s ease-in-out;
+}
+
+@media (min-width: 768px) {
+  .card {
+    border-radius: 15px;
+  }
+}
+
+.card:hover {
+  transform: translateY(-1px);
+}
+
+@media (min-width: 768px) {
+  .card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.table-responsive {
+  border-radius: 0 0 10px 10px;
+  max-height: 70vh;
+}
+
+@media (min-width: 768px) {
+  .table-responsive {
+    border-radius: 0 0 15px 15px;
+    max-height: 600px;
+  }
+}
+
+.mobile-sale-card {
+  background: #fff;
+  transition: background-color 0.2s;
+}
+
+.mobile-sale-card:hover {
+  background-color: #f8f9fa;
+}
+
+.mobile-sale-card:last-child {
+  border-bottom: none !important;
+}
+
+.day-group {
+  border-left: 4px solid #007bff;
+  margin-bottom: 1rem;
+}
+
+.day-header {
+  background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* Touch-friendly enhancements */
+@media (max-width: 767.98px) {
+  .btn {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  .form-control {
+    min-height: 44px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .mobile-sale-card {
+    touch-action: manipulation;
+  }
+}
+
+/* Improved responsive breakpoints */
+@media (max-width: 575.98px) {
+  .container-fluid {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  
+  .card-body {
+    padding: 1rem 0.75rem;
+  }
+  
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Better spacing for medium screens */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .card-body {
+    padding: 1.25rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .btn, .card-header, #filterCollapse {
+    display: none !important;
+  }
+  
+  .card {
+    border: 1px solid #000 !important;
+    box-shadow: none !important;
+  }
+  
+  .mobile-sale-card {
+    page-break-inside: avoid;
+  }
+}
+</style>
+
+<script>
+// Enhanced responsive functionality
+let isMobile = window.innerWidth < 768;
+let isTablet = window.innerWidth >= 768 && window.innerWidth < 992;
+
+// Responsive behavior on resize
+window.addEventListener('resize', function() {
+  const newIsMobile = window.innerWidth < 768;
+  const newIsTablet = window.innerWidth >= 768 && window.innerWidth < 992;
+  
+  if (newIsMobile !== isMobile || newIsTablet !== isTablet) {
+    isMobile = newIsMobile;
+    isTablet = newIsTablet;
+    updateSummaryStats();
+  }
+});
+
+// Enhanced summary statistics calculation
+function updateSummaryStats() {
+  let rows;
+  
+  if (isMobile) {
+    rows = document.querySelectorAll('.mobile-sale-card:not([style*="display: none"])');
+  } else if (isTablet) {
+    rows = document.querySelectorAll('#salesTableTablet tbody tr:not([style*="display: none"])');
+  } else {
+    rows = document.querySelectorAll('#salesTableBody tr:not([style*="display: none"])');
+  }
+  
+  let totalSales = 0;
+  let totalItems = 0;
+  let transactions = rows.length;
+
+  rows.forEach(row => {
+    let quantity, price, total;
+    
+    if (isMobile) {
+      // Extract from mobile card structure
+      const quantityBadge = row.querySelector('.badge');
+      const priceElements = row.querySelectorAll('.small');
+      quantity = parseInt(quantityBadge?.textContent.trim()) || 0;
+      
+      // Find the unit price element
+      for (let elem of priceElements) {
+        if (elem.textContent.includes('₹') && elem.parentElement.querySelector('small').textContent === 'Unit Price') {
+          price = parseFloat(elem.textContent.replace('₹', '').trim()) || 0;
+          break;
+        }
+      }
+      total = quantity * price;
+    } else {
+      // Extract from table structure
+      const cells = row.cells;
+      if (isTablet) {
+        quantity = parseInt(cells[1].textContent.trim()) || 0;
+        price = parseFloat(cells[2].textContent.replace('₹', '').trim()) || 0;
+      } else {
+        quantity = parseInt(cells[2].textContent.trim()) || 0;
+        price = parseFloat(cells[3].textContent.replace('₹', '').trim()) || 0;
+      }
+      total = price * quantity;
+    }
+    
+    totalSales += total;
+    totalItems += quantity;
+  });
+
+  const avgSale = transactions > 0 ? totalSales / transactions : 0;
+
+  document.getElementById('totalSales').textContent = '₹' + totalSales.toFixed(2);
+  document.getElementById('totalItems').textContent = totalItems;
+  document.getElementById('avgSale').textContent = '₹' + avgSale.toFixed(2);
+  document.getElementById('totalTransactions').textContent = transactions;
+}
+
+// Enhanced search functionality for all views
+document.getElementById('searchInput').addEventListener('input', function() {
+  const searchTerm = this.value.toLowerCase();
+  
+  if (isMobile) {
+    const cards = document.querySelectorAll('.mobile-sale-card');
+    cards.forEach(card => {
+      const itemName = card.querySelector('.fw-semibold').textContent.toLowerCase();
+      const date = card.querySelector('.text-muted').textContent.toLowerCase();
+      
+      if (itemName.includes(searchTerm) || date.includes(searchTerm)) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  } else if (isTablet) {
+    const rows = document.querySelectorAll('#salesTableTablet tbody tr');
+    rows.forEach(row => {
+      const itemName = row.cells[0].textContent.toLowerCase();
+      
+      if (itemName.includes(searchTerm)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  } else {
+    const rows = document.querySelectorAll('#salesTableBody tr');
+    rows.forEach(row => {
+      const itemName = row.cells[1].textContent.toLowerCase();
+      const date = row.cells[0].textContent.toLowerCase();
+      
+      if (itemName.includes(searchTerm) || date.includes(searchTerm)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+  
+  updateSummaryStats();
+});
+
+// Responsive sorting functionality
+let sortDirection = {};
+
+document.querySelectorAll('.sortable').forEach(header => {
+  header.addEventListener('click', function() {
+    if (isMobile) return; // Disable sorting on mobile
+    
+    const column = this.getAttribute('data-column');
+    const tbody = isTablet ? 
+      document.querySelector('#salesTableTablet tbody') : 
+      document.getElementById('salesTableBody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    // Toggle sort direction
+    sortDirection[column] = sortDirection[column] === 'asc' ? 'desc' : 'asc';
+    const isAscending = sortDirection[column] === 'asc';
+    
+    // Update sort icons
+    document.querySelectorAll('.sortable .float-end').forEach(icon => {
+      icon.className = 'fas fa-sort float-end mt-1';
+    });
+    
+    const currentIcon = this.querySelector('.float-end');
+    if (currentIcon) {
+      currentIcon.className = `fas fa-sort-${isAscending ? 'up' : 'down'} float-end mt-1`;
+    }
+    
+    // Sort rows based on view type
+    rows.sort((a, b) => {
+      let aValue, bValue;
+      
+      if (isTablet) {
+        switch(column) {
+          case 'date':
+            aValue = new Date(a.getAttribute('data-date') || 0);
+            bValue = new Date(b.getAttribute('data-date') || 0);
+            break;
+          case 'item':
+            aValue = a.cells[0].textContent.trim().toLowerCase();
+            bValue = b.cells[0].textContent.trim().toLowerCase();
+            break;
+          case 'quantity':
+            aValue = parseInt(a.cells[1].textContent.trim()) || 0;
+            bValue = parseInt(b.cells[1].textContent.trim()) || 0;
+            break;
+          case 'price':
+            aValue = parseFloat(a.cells[2].textContent.replace('₹', '').trim()) || 0;
+            bValue = parseFloat(b.cells[2].textContent.replace('₹', '').trim()) || 0;
+            break;
+          case 'total':
+            aValue = parseFloat(a.cells[3].textContent.replace('₹', '').trim()) || 0;
+            bValue = parseFloat(b.cells[3].textContent.replace('₹', '').trim()) || 0;
+            break;
+        }
+      } else {
+        // Desktop sorting logic (same as before)
+        switch(column) {
+          case 'date':
+            aValue = new Date(a.getAttribute('data-date') || 0);
+            bValue = new Date(b.getAttribute('data-date') || 0);
+            break;
+          case 'item':
+            aValue = a.cells[1].textContent.trim().toLowerCase();
+            bValue = b.cells[1].textContent.trim().toLowerCase();
+            break;
+          case 'quantity':
+            aValue = parseInt(a.cells[2].textContent.trim()) || 0;
+            bValue = parseInt(b.cells[2].textContent.trim()) || 0;
+            break;
+          case 'price':
+            aValue = parseFloat(a.cells[3].textContent.replace('₹', '').trim()) || 0;
+            bValue = parseFloat(b.cells[3].textContent.replace('₹', '').trim()) || 0;
+            break;
+          case 'total':
+            aValue = parseFloat(a.cells[4].textContent.replace('₹', '').trim()) || 0;
+            bValue = parseFloat(b.cells[4].textContent.replace('₹', '').trim()) || 0;
+            break;
+        }
+      }
+      
+      if (aValue < bValue) return isAscending ? -1 : 1;
+      if (aValue > bValue) return isAscending ? 1 : -1;
+      return 0;
+    });
+    
+    // Reorder DOM
+    rows.forEach(row => tbody.appendChild(row));
+  });
+});
+
+// Enhanced mobile-friendly group by day functionality
+document.getElementById('groupByDay').addEventListener('click', function() {
+  let rows;
+  
+  if (isMobile) {
+    rows = document.querySelectorAll('.mobile-sale-card');
+  } else if (isTablet) {
+    rows = document.querySelectorAll('#salesTableTablet tbody tr');
+  } else {
+    rows = document.querySelectorAll('#salesTableBody tr');
+  }
+  
+  const dayGroups = {};
+  
+  rows.forEach(row => {
+    const dateStr = row.getAttribute('data-date');
+    if (!dateStr) return;
+    
+    const date = new Date(dateStr);
+    const dayKey = date.toDateString();
+    
+    if (!dayGroups[dayKey]) {
+      dayGroups[dayKey] = {
+        date: date,
+        sales: [],
+        totalAmount: 0,
+        totalItems: 0
+      };
+    }
+    
+    let quantity, price, itemName;
+    
+    if (isMobile) {
+      quantity = parseInt(row.querySelector('.badge').textContent.trim()) || 0;
+      const priceElements = row.querySelectorAll('.small');
+      for (let elem of priceElements) {
+        if (elem.textContent.includes('₹') && elem.parentElement.querySelector('small').textContent === 'Unit Price') {
+          price = parseFloat(elem.textContent.replace('₹', '').trim()) || 0;
+          break;
+        }
+      }
+      itemName = row.querySelector('.fw-semibold').textContent.trim();
+    } else if (isTablet) {
+      quantity = parseInt(row.cells[1].textContent.trim()) || 0;
+      price = parseFloat(row.cells[2].textContent.replace('₹', '').trim()) || 0;
+      itemName = row.cells[0].querySelector('.fw-semibold').textContent.trim();
+    } else {
+      quantity = parseInt(row.cells[2].textContent.trim()) || 0;
+      price = parseFloat(row.cells[3].textContent.replace('₹', '').trim()) || 0;
+      itemName = row.cells[1].textContent.trim();
+    }
+    
+    const total = price * quantity;
+    
+    dayGroups[dayKey].sales.push({
+      item: itemName,
+      quantity: quantity,
+      price: price,
+      total: total,
+      time: date.toLocaleTimeString()
+    });
+    
+    dayGroups[dayKey].totalAmount += total;
+    dayGroups[dayKey].totalItems += quantity;
+  });
+  
+  // Create responsive day-wise view
+  let dayWiseHTML = '';
+  
+  Object.keys(dayGroups)
+    .sort((a, b) => new Date(b) - new Date(a))
+    .forEach(dayKey => {
+      const group = dayGroups[dayKey];
+      
+      dayWiseHTML += `
+        <div class="day-group">
+          <div class="day-header p-2 p-md-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+            <div>
+              <h5 class="mb-0 text-primary fs-6 fs-md-5">${group.date.toLocaleDateString('en-US', {
+                weekday: isMobile ? 'short' : 'long',
+                year: 'numeric',
+                month: isMobile ? 'short' : 'long',
+                day: 'numeric'
+              })}</h5>
+              <small class="text-muted">${group.sales.length} transactions</small>
+            </div>
+            <div class="text-start text-sm-end">
+              <div class="text-success fw-bold fs-6 fs-md-5">₹${group.totalAmount.toFixed(2)}</div>
+              <small class="text-muted">${group.totalItems} items</small>
+            </div>
+          </div>
+          <div class="p-2 p-md-3">
+      `;
+      
+      if (isMobile) {
+        // Mobile card layout for day groups
+        group.sales.forEach(sale => {
+          dayWiseHTML += `
+            <div class="border rounded mb-2 p-2">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-semibold small">${sale.item}</span>
+                <span class="text-success fw-bold small">₹${sale.total}</span>
+              </div>
+              <div class="d-flex justify-content-between text-muted">
+                <small>${sale.time}</small>
+                <small>Qty: ${sale.quantity} × ₹${sale.price}</small>
+              </div>
+            </div>
+          `;
+        });
+      } else {
+        // Table layout for larger screens
+        dayWiseHTML += `
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th class="small">Time</th>
+                  <th class="small">Item</th>
+                  <th class="text-center small">Quantity</th>
+                  <th class="text-end small">Price</th>
+                  <th class="text-end small">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        
+        group.sales.forEach(sale => {
+          dayWiseHTML += `
+            <tr>
+              <td class="small">${sale.time}</td>
+              <td class="small">${sale.item}</td>
+              <td class="text-center small">${sale.quantity}</td>
+              <td class="text-end small">₹${sale.price}</td>
+              <td class="text-end text-success fw-semibold small">₹${sale.total}</td>
+            </tr>
+          `;
+        });
+        
+        dayWiseHTML += `
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+      
+      dayWiseHTML += `
+          </div>
+        </div>
+      `;
+    });
+  
+  document.getElementById('dayWiseContent').innerHTML = dayWiseHTML;
+  toggleView();
+});
+
+// Toggle between views
+function toggleView() {
+  const regularView = document.querySelector('.container-fluid');
+  const dayWiseView = document.getElementById('dayWiseView');
+  
+  if (dayWiseView.style.display === 'none') {
+    regularView.style.display = 'none';
+    dayWiseView.style.display = 'block';
+  } else {
+    regularView.style.display = 'block';
+    dayWiseView.style.display = 'none';
+  }
+}
+
+// Enhanced export functionality
+function exportToCSV() {
+  let rows;
+  
+  if (isMobile) {
+    // Create CSV from mobile cards
+    const cards = document.querySelectorAll('.mobile-sale-card:not([style*="display: none"])');
+    let csv = ['Date,Item,Quantity,Price,Total'];
+    
+    cards.forEach(card => {
+      const item = card.querySelector('.fw-semibold').textContent.trim();
+      const date = card.querySelector('.text-muted').textContent.trim();
+      const quantity = card.querySelector('.badge').textContent.trim();
+      const priceElements = card.querySelectorAll('.small');
+      let price = '', total = '';
+      
+      for (let elem of priceElements) {
+        if (elem.textContent.includes('₹') && elem.parentElement.querySelector('small').textContent === 'Unit Price') {
+          price = elem.textContent.replace('₹', '').trim();
+        }
+        if (elem.textContent.includes('₹') && elem.parentElement.querySelector('small').textContent === 'Total') {
+          total = elem.textContent.replace('₹', '').trim();
+        }
+      }
+      
+      csv.push(`"${date}","${item}","${quantity}","${price}","${total}"`);
+    });
+    
+    const csvContent = csv.join('\n');
+    downloadCSV(csvContent);
+  } else {
+    // Use existing table export logic
+    const table = isTablet ? document.getElementById('salesTableTablet') : document.getElementById('salesTable');
+    const rows = table.querySelectorAll('tr');
+    let csv = [];
+    
+    for (let row of rows) {
+      const cols = row.querySelectorAll('td, th');
+      const rowData = [];
+      for (let col of cols) {
+        rowData.push('"' + col.textContent.trim().replace(/"/g, '""') + '"');
+      }
+      csv.push(rowData.join(','));
+    }
+    
+    const csvContent = csv.join('\n');
+    downloadCSV(csvContent);
+  }
+}
+
+function downloadCSV(csvContent) {
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'sales_history.csv';
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+// Print functionality
+function printTable() {
+  window.print();
+}
+
+// Initialize responsive behavior
+document.addEventListener('DOMContentLoaded', function() {
+  updateSummaryStats();
+  
+  // Initialize Bootstrap tooltips if available
+  if (typeof bootstrap !== 'undefined') {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  }
+  
+  // Handle viewport meta tag for better mobile experience
+  if (!document.querySelector('meta[name="viewport"]')) {
+    const viewportMeta = document.createElement('meta');
+    viewportMeta.name = 'viewport';
+    viewportMeta.content = 'width=device-width, initial-scale=1.0, shrink-to-fit=no';
+    document.head.appendChild(viewportMeta);
+  }
+});
+
+// Touch gesture support for mobile swipe actions
+if ('ontouchstart' in window) {
+  let startX = 0;
+  let startY = 0;
+  
+  document.addEventListener('touchstart', function(e) {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  });
+  
+  document.addEventListener('touchend', function(e) {
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    const diffX = startX - endX;
+    const diffY = startY - endY;
+    
+    // Detect horizontal swipe on mobile cards for potential actions
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+      const target = e.target.closest('.mobile-sale-card');
+      if (target) {
+        // You can add swipe actions here if needed
+        target.style.transform = 'translateX(0)';
+      }
+    }
+  });
+}
+</script>
+
 {% endblock %}
