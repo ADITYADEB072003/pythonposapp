@@ -15,13 +15,8 @@ app = Flask(__name__)
 app.secret_key = 'some_secret_key'
 
 # MongoDB connection
-import os
-from pymongo import MongoClient
-
-mongo_uri = os.getenv("MONGO_URI", "your_LOCAL_MONGO_URI_if_any")
-client = MongoClient(mongo_uri)
+client = MongoClient("mongodb+srv://adityadeb:eCunNWFwpyZpHdul@testid.hyqwjw5.mongodb.net/?retryWrites=true&w=majority&appName=testid")
 db = client['pos_db']
-
 inventory_col = db['inventory']
 sales_col = db['sales']
 
