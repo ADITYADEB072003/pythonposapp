@@ -18,10 +18,18 @@
           <small>Stock: {{ item.quantity }}</small>
         </p>
         <form method="POST" action="{{ url_for('billing') }}" class="d-inline">
-          <input type="hidden" name="item_id" value="{{ item._id }}">
-          <input type="number" name="quantity" min="1" max="{{ item.quantity }}" value="1" class="form-control mb-2" style="width:70px;display:inline;">
-          <button class="btn btn-primary btn-sm">Add to Cart</button>
-        </form>
+  <input type="hidden" name="item_id" value="{{ item._id }}">
+  <input type="number" name="quantity" min="1" max="{{ item.quantity }}" value="1" class="form-control mb-2" style="width:70px;display:inline;"
+         {% if item.quantity == 0 %}disabled{% endif %}>
+  <button class="btn btn-primary btn-sm"
+          {% if item.quantity == 0 %}disabled{% endif %}>
+    Add to Cart
+  </button>
+</form>
+{% if item.quantity == 0 %}
+  <span class="badge bg-danger">Out of Stock</span>
+{% endif %}
+
       </div>
     </div>
   </div>
@@ -32,7 +40,7 @@
 {% if cart %}
 <table class="table">
   <tr>
-    <th>Item</th><th>Qty</th><th>Price</th><th>Subtotal</th>
+    <th>Item</th><th>Qty</th><th>Price</th><th>Subtotal</th><th>Action</th>
   </tr>
   {% for ci in cart %}
   <tr>
@@ -40,11 +48,17 @@
     <td>{{ ci.cart_qty }}</td>
     <td>₹{{ ci.price }}</td>
     <td>₹{{ ci.subtotal }}</td>
+    <td>
+      <form method="POST" action="{{ url_for('delete_cart_item', item_id=ci._id) }}" style="display:inline;">
+        <button class="btn btn-danger btn-sm" onclick="return confirm('Remove this item?')">Delete</button>
+      </form>
+    </td>
   </tr>
   {% endfor %}
   <tr>
     <td colspan="3"><strong>Total</strong></td>
     <td><strong>₹{{ total }}</strong></td>
+    <td></td>
   </tr>
 </table>
 <form method="POST" action="{{ url_for('checkout') }}">

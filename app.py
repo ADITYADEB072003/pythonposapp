@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, Response
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from datetime import datetime
@@ -29,7 +29,6 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 @app.route('/')
 def home():
@@ -104,30 +103,47 @@ def billing():
         if product:
             product["cart_qty"] = qty
             product["subtotal"] = qty * product["price"]
+            product["_id"] = str(product["_id"])   # Convert ObjectId to string for template
             cart_items.append(product)
             total += product["subtotal"]
 
     return render_template("billing.html", items=items, cart=cart_items, total=total, search=search)
 
+@app.route('/cart/delete/<item_id>', methods=['POST'])
+def delete_cart_item(item_id):
+    cart = session.get("cart", {})
+    if item_id in cart:
+        cart.pop(item_id)
+        session["cart"] = cart
+        flash("Item removed from cart.", "info")
+    return redirect(url_for("billing"))
+
 @app.route('/checkout', methods=['POST'])
 def checkout():
     cart = session.get("cart", {})
     bill_items = []
+    # First, check all items for stock sufficiency
     for item_id, qty in cart.items():
         product = inventory_col.find_one({"_id": ObjectId(item_id)})
-        if product and product['quantity'] >= qty:
-            inventory_col.update_one({"_id": ObjectId(item_id)}, {"$inc": {"quantity": -qty}})
-            sales_col.insert_one({
-                "name": product["name"],
-                "quantity": qty,
-                "price": product['price'],
-                "date": datetime.utcnow()
-            })
-            bill_items.append({
-                "name": product["name"],
-                "quantity": qty,
-                "price": product['price']
-            })
+        if not product or product['quantity'] < qty:
+            flash(f"Not enough stock for {product['name'] if product else 'an item'} (available: {product['quantity'] if product else 0}).", "danger")
+            return redirect(url_for("billing"))
+
+    # All items have enough stock: proceed to sale
+    for item_id, qty in cart.items():
+        product = inventory_col.find_one({"_id": ObjectId(item_id)})
+        inventory_col.update_one({"_id": ObjectId(item_id)}, {"$inc": {"quantity": -qty}})
+        sales_col.insert_one({
+            "name": product["name"],
+            "quantity": qty,
+            "price": product['price'],
+            "date": datetime.utcnow()
+        })
+        bill_items.append({
+            "name": product["name"],
+            "quantity": qty,
+            "price": product['price']
+        })
 
     session["last_bill"] = bill_items
     session["cart"] = {}
@@ -181,18 +197,15 @@ def sales_history():
     chart_data = base64.b64encode(buf.getvalue()).decode()
 
     return render_template('sales.html', sales=sales, chart_data=chart_data, start=start, end=end)
+
 @app.route('/sales_chart.png')
 def sales_chart():
-    # generate plot as before
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
     plt.close()
     buf.seek(0)
     return Response(buf.getvalue(), mimetype='image/png')
 
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
-
-
