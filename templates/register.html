@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<h2>Register</h2>
+<form method="POST" action="{{ url_for('register') }}">
+  <div class="mb-3">
+    <label for="username" class="form-label">Username</label>
+    <input type="text" id="username" name="username" class="form-control" required autofocus>
+  </div>
+  <div class="mb-3">
+    <label for="password" class="form-label">Password</label>
+    <input type="password" id="password" name="password" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label for="org_id" class="form-label">Organization</label>
+    <select id="org_id" name="org_id" class="form-select" required onchange="toggleNewOrgInput()">
+      <option value="">-- Select Organization --</option>
+      {% for org in organizations %}
+      <option value="{{ org._id }}">{{ org.name }}</option>
+      {% endfor %}
+      <option value="new">-- New Organization --</option>
+    </select>
+  </div>
+  <div class="mb-3" id="new_org_div" style="display:none;">
+    <label for="new_org_name" class="form-label">New Organization Name</label>
+    <input type="text" id="new_org_name" name="new_org_name" class="form-control">
+  </div>
+  <button type="submit" class="btn btn-primary">Register</button>
+</form>
+<p class="mt-3">Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+
+<script>
+  function toggleNewOrgInput() {
+    const orgSelect = document.getElementById('org_id');
+    const newOrgDiv = document.getElementById('new_org_div');
+    if (orgSelect.value === 'new') {
+      newOrgDiv.style.display = 'block';
+      document.getElementById('new_org_name').required = true;
+    } else {
+      newOrgDiv.style.display = 'none';
+      document.getElementById('new_org_name').required = false;
+    }
+  }
+</script>
+{% endblock %}
