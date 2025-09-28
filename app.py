@@ -128,21 +128,45 @@ def register():
 
     return render_template('register.html', organizations=organizations)
 
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if request.method == 'POST':
+#         username = request.form['username'].strip()
+#         password = request.form['password']
+
+#         user_doc = users_col.find_one({"username": username})
+#         if user_doc and check_password_hash(user_doc['password_hash'], password):
+#             user = User(user_doc)
+#             login_user(user)
+#             flash(f"Logged in as {username}", "success")
+#             return redirect(url_for('inventory'))
+#         else:
+#             flash("Invalid username or password", "danger")
+
+#     return render_template('login.html')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('inventory'))
+        
     if request.method == 'POST':
         username = request.form['username'].strip()
         password = request.form['password']
-
         user_doc = users_col.find_one({"username": username})
-        if user_doc and check_password_hash(user_doc['password_hash'], password):
+
+        # This condition now checks if the user exists, is active, and the password is correct
+        if (user_doc and 
+            user_doc.get('is_active', True) and 
+            check_password_hash(user_doc.get('password_hash', ''), password)):
+            
             user = User(user_doc)
             login_user(user)
             flash(f"Logged in as {username}", "success")
             return redirect(url_for('inventory'))
         else:
-            flash("Invalid username or password", "danger")
-
+            # The error message is updated to be more informative
+            flash("Invalid username or password, or account is inactive.", "danger")
+            
     return render_template('login.html')
 
 @app.route('/logout')
