@@ -1,47 +1,188 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Inventory</h2>
-<form method="POST" enctype="multipart/form-data" class="mb-4 row g-3">
-  <div class="col-md-3">
-    <input name="name" placeholder="Item name" class="form-control" required>
-  </div>
-  <div class="col-md-2">
-    <input name="price" type="number" step="0.01" placeholder="Price" class="form-control" required>
-  </div>
-  <div class="col-md-2">
-    <input name="quantity" type="number" placeholder="Quantity" class="form-control" required>
-  </div>
-  <div class="col-md-3">
-    <input name="image" type="file" class="form-control" accept="image/*">
-  </div>
-  <div class="col-md-2">
-    <button class="btn btn-primary w-100">Add / Update</button>
-  </div>
-</form>
+<h2 class="mb-3 fw-bold text-primary"><i class="bi bi-box-seam"></i> Inventory</h2>
 
-<table class="table table-striped">
-  <thead>
-    <tr><th>Image</th><th>Name</th><th>Price (₹)</th><th>Quantity</th><th>Actions</th></tr>
-  </thead>
-  <tbody>
-    {% for item in items %}
-    <tr>
-      <td>
-        {% if item.image %}
-          <img src="{{ url_for('static', filename='images/' + item.image) }}" style="height:50px;">
-        {% else %}
-          No Image
-        {% endif %}
-      </td>
-      <td>{{ item.name }}</td>
-      <td>{{ item.price }}</td>
-      <td>{{ item.quantity }}</td>
-      <td>
-        <a href="{{ url_for('delete_inventory', item_id=item._id) }}" class="btn btn-danger btn-sm"
-           onclick="return confirm('Delete {{ item.name }}?');">Delete</a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="row mb-4 g-3">
+  <div class="col-12 col-lg-8">
+    <div class="card shadow-sm rounded-4 border-primary">
+      <div class="card-body">
+        <form id="inventory-form" method="POST" enctype="multipart/form-data" class="row g-3 align-items-end">
+          <input type="hidden" name="item_id" id="item_id">
+          <div class="col-12 col-md-6 col-lg-3">
+            <input id="name" name="name" placeholder="Item Name" class="form-control rounded-pill border-info" required>
+          </div>
+          <div class="col-12 col-md-6 col-lg-2">
+            <input id="price" name="price" type="number" step="0.01" placeholder="Price" class="form-control rounded-pill border-info" required>
+          </div>
+          <div class="col-12 col-md-6 col-lg-2">
+            <input id="quantity" name="quantity" type="number" placeholder="Quantity" class="form-control rounded-pill border-info" required>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3">
+            <input id="image" name="image" type="file" class="form-control rounded-pill border-info" accept="image/*">
+          </div>
+          <div class="col-12 col-lg-2 d-grid">
+            <button id="form-submit" class="btn btn-gradient-primary rounded-pill w-100"><i class="bi bi-plus-circle"></i> Add</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-lg-4 mt-3 mt-lg-0">
+    <div class="card shadow-sm rounded-4 border-info">
+      <div class="card-body">
+        <input id="search-bar" type="text" class="form-control rounded-pill border-info" placeholder="🔍 Search inventory...">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow rounded-4 border-0 mb-3">
+  <div class="card-body p-0">
+    <div class="d-none d-md-block">
+      <table class="table table-hover align-middle mb-0" id="inventory-table">
+        <thead class="table-primary">
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price (₹)</th>
+            <th>Quantity</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr class="table-row" style="transition:background 0.2s;" data-id="{{ item._id }}" data-name="{{ item.name }}" data-price="{{ item.price }}" data-quantity="{{ item.quantity }}">
+            <td>
+              {% if item.image %}
+                <img src="{{ url_for('static', filename='images/' + item.image) }}" class="rounded shadow-sm border border-info" style="height:42px;">
+              {% else %}
+                <span class="text-secondary">No Image</span>
+              {% endif %}
+            </td>
+            <td class="item-name fw-semibold text-dark">{{ item.name }}</td>
+            <td class="item-price text-success">{{ item.price }}</td>
+            <td class="item-quantity text-info">{{ item.quantity }}</td>
+            <td>
+              <button type="button" class="btn btn-outline-info btn-sm btn-edit rounded-pill me-1"><i class="bi bi-pencil-square"></i> Edit</button>
+              <a href="{{ url_for('delete_inventory', item_id=item._id) }}" class="btn btn-outline-danger btn-sm rounded-pill"
+                 onclick="return confirm('Delete {{ item.name }}?');"><i class="bi bi-trash"></i> Delete</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <!-- Mobile card view -->
+    <div class="d-block d-md-none">
+      {% for item in items %}
+      <div class="card mb-2 shadow-sm border-info" data-id="{{ item._id }}" data-name="{{ item.name }}" data-price="{{ item.price }}" data-quantity="{{ item.quantity }}">
+        <div class="card-body py-2 px-3 d-flex flex-column">
+          <div class="d-flex align-items-center mb-2">
+            {% if item.image %}
+              <img src="{{ url_for('static', filename='images/' + item.image) }}" class="rounded border border-info me-2" style="height:32px;">
+            {% else %}
+              <span class="text-secondary me-2">No Image</span>
+            {% endif %}
+            <span class="fw-semibold text-dark flex-grow-1">{{ item.name }}</span>
+          </div>
+          <div class="mb-1"><span class="text-success">₹{{ item.price }}</span></div>
+          <div class="mb-2"><span class="text-danger-custom">Qty: {{ item.quantity }}</span></div>
+          <div>
+            <button type="button" class="btn btn-outline-info btn-sm btn-edit rounded-pill me-1"><i class="bi bi-pencil-square"></i> Edit</button>
+            <a href="{{ url_for('delete_inventory', item_id=item._id) }}" class="btn btn-outline-danger btn-sm rounded-pill"
+               onclick="return confirm('Delete {{ item.name }}?');"><i class="bi bi-trash"></i> Delete</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.table-row').forEach(row => {
+  row.addEventListener('mouseenter', () => row.style.background = '#e9f7fd');
+  row.addEventListener('mouseleave', () => row.style.background = '');
+});
+document.querySelectorAll('.btn-edit').forEach(btn => {
+  btn.addEventListener('click', function() {
+    let parent = window.innerWidth < 768 ? btn.closest('.card') : btn.closest('tr');
+    document.getElementById('item_id').value = parent.dataset.id;
+    document.getElementById('name').value = parent.dataset.name;
+    document.getElementById('price').value = parent.dataset.price;
+    document.getElementById('quantity').value = parent.dataset.quantity;
+    document.getElementById('form-submit').innerHTML = '<i class="bi bi-check-circle"></i> Update';
+    document.getElementById('image').value = "";
+    document.getElementById('inventory-form').classList.add('border', 'border-info', 'shadow');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+document.getElementById('inventory-form').addEventListener('reset', function() {
+  document.getElementById('item_id').value = '';
+  document.getElementById('form-submit').innerHTML = '<i class="bi bi-plus-circle"></i> Add';
+  document.getElementById('inventory-form').classList.remove('border', 'border-info', 'shadow');
+});
+document.getElementById('search-bar').addEventListener('input', function(e) {
+  let search = e.target.value.toLowerCase();
+  let inTable = document.querySelectorAll('#inventory-table tbody tr');
+  let inCards = document.querySelectorAll('.card[data-id]');
+  inTable.forEach(row => {
+    let name = row.querySelector('.item-name').textContent.toLowerCase();
+    let price = row.querySelector('.item-price').textContent.toLowerCase();
+    let quantity = row.querySelector('.item-quantity').textContent.toLowerCase();
+    row.style.display = (
+      name.includes(search) ||
+      price.includes(search) ||
+      quantity.includes(search)
+    ) ? '' : 'none';
+  });
+  inCards.forEach(card => {
+    let name = card.dataset.name.toLowerCase();
+    let price = String(card.dataset.price).toLowerCase();
+    let quantity = String(card.dataset.quantity).toLowerCase();
+    card.style.display = (
+      name.includes(search) ||
+      price.includes(search) ||
+      quantity.includes(search)
+    ) ? '' : 'none';
+  });
+});
+</script>
+
+<style>
+.btn-gradient-primary {
+  background: linear-gradient(90deg,#2564f6 0%,#44caff 100%);
+  color: #fff;
+  border: none;
+}
+.btn-gradient-primary:hover, .btn-gradient-primary:focus {
+  background: linear-gradient(90deg,#1162e6 0%,#23b6e4 100%);
+  color:white;
+}
+.card {
+  border-radius: 1.1rem !important;
+}
+.text-danger-custom {
+  color: #dc3545 !important;
+}
+.form-control:focus {
+  border-color: #44caff;
+  box-shadow: 0 0 0 0.2rem rgba(68,202,255,.15);
+}
+@media (max-width: 767.98px) {
+  #inventory-form .form-control,
+  #inventory-form .btn,
+  #search-bar {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  #inventory-form .col-12 {
+    margin-bottom: 0.5rem;
+  }
+  .text-danger-custom {
+  color: #dc3545 !important;
+}
+  .card[data-id] .btn { width: 48%; }
+}
+</style>
 {% endblock %}
