@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="card bg-info text-white shadow-lg mb-4">
+        <div class="card-body p-4 d-flex align-items-center">
+            <div class="bg-white bg-opacity-25 rounded-3 me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                <i class="fas fa-brain fa-lg"></i>
+            </div>
+            <div>
+                <h2 class="mb-0 text-white">Inventory Forecasting</h2>
+                <p class="mb-0 text-white-75 small">AI-powered recommendations for what to restock next.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Performance Metrics -->
+    {% if metrics %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light border-0">
+            <h5 class="mb-0 text-muted">Model Performance</h5>
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <h5>R-squared (R²)</h5>
+                    <p class="fs-4 fw-bold">{{ "%.2f"|format(metrics.r2_score) }}</p>
+                    <p class="text-muted small" data-bs-toggle="tooltip" title="Explains the percentage of sales patterns the model can predict. Higher is better (1.0 is perfect).">
+                        Model Fit <i class="fas fa-info-circle"></i>
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Mean Absolute Error (MAE)</h5>
+                    <p class="fs-4 fw-bold">{{ "%.2f"|format(metrics.mae) }}</p>
+                    <p class="text-muted small" data-bs-toggle="tooltip" title="On average, the model's weekly prediction is off by this many items. Lower is better.">
+                        Avg. Prediction Error <i class="fas fa-info-circle"></i>
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Root Mean Squared Error (RMSE)</h5>
+                    <p class="fs-4 fw-bold">{{ "%.2f"|format(metrics.rmse) }}</p>
+                    <p class="text-muted small" data-bs-toggle="tooltip" title="Similar to MAE, but penalizes large errors more heavily. Lower is better.">
+                        Error (Penalizing Large Misses) <i class="fas fa-info-circle"></i>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recommendations Table -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light border-0">
+            <h5 class="mb-0 text-muted">Restock Recommendations</h5>
+        </div>
+        <div class="card-body">
+            {% if recommendations %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Product Name</th>
+                            <th scope="col" class="text-center">Item Code</th>
+                            <th scope="col" class="text-center">Current Stock</th>
+                            <th scope="col" class="text-center">Predicted Demand (Next 4 Weeks)</th>
+                            <th scope="col" class="text-center text-danger">Recommended Order Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in recommendations %}
+                        <tr>
+                            <td><strong>{{ item.name }}</strong></td>
+                            <td class="text-center">{{ item.item_code }}</td>
+                            <td class="text-center">{{ item.current_stock | int }}</td>
+                            <td class="text-center">{{ item.predicted_demand | int }}</td>
+                            <td class="text-center fw-bold text-danger fs-5">
+                                {{ item.shortfall | int }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center p-5">
+                <h5 class="text-muted">No restock recommendations at this time.</h5>
+                <p>This could be because your current stock is sufficient or there isn't enough sales data to generate a reliable forecast.</p>
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-footer text-muted small">
+            Predictions are based on historical sales trends. Please use your professional judgment when ordering.
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Bootstrap tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %}

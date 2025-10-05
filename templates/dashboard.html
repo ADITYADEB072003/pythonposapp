@@ -1,7 +1,98 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
+
 {% block content %}
-<h2>Dashboard</h2>
-<p>Welcome, {{ current_user.username }}!</p>
-<p>Your organization: {{ current_user.org_id }}</p>
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3">Dashboard</h1>
+            <p class="text-muted">Welcome back, {{ current_user.username }}! Here's an overview of your business.</p>
+        </div>
+    </div>
+
+    <!-- Key Performance Indicator (KPI) Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white bg-primary shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total Sales</h5>
+                    <!-- Replace with your dynamic data variable -->
+                    <p class="card-text fs-4 fw-bold">₹{{ "%.2f"|format(total_sales) }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white bg-info shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Unique Items</h5>
+                    <!-- Replace with your dynamic data variable -->
+                    <p class="card-text fs-4 fw-bold">{{ total_items }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white bg-warning shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Low Stock Alerts</h5>
+                    <!-- Replace with your dynamic data variable -->
+                    <p class="card-text fs-4 fw-bold">{{ low_stock_count }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white bg-success shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Completed Sales</h5>
+                    <!-- You can calculate this in your backend -->
+                    <p class="card-text fs-4 fw-bold">{{ recent_sales|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area: Chart and Lists -->
+    <div class="row">
+        <!-- Sales Chart -->
+        <div class="col-lg-7 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Sales Over Time
+                </div>
+                <div class="card-body text-center">
+                    {% if chart_data %}
+                        <img src="data:image/png;base64,{{ chart_data }}" class="img-fluid" alt="Sales Chart">
+                    {% else %}
+                        <p class="text-muted mt-3">No sales data available to display chart.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <i class="fas fa-history me-1"></i>
+                    Recent Sales Activity
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    <ul class="list-group list-group-flush">
+                        {% for sale in recent_sales %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ sale.name }}</strong> (x{{ sale.quantity }})
+                                </div>
+                                <small class="text-muted">{{ sale.date.strftime('%b %d, %I:%M %p') }}</small>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item text-center text-muted">No recent sales recorded.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
