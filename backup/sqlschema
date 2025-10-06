@@ -1,0 +1,28 @@
+-- Create the database if it doesn't exist
+CREATE DATABASE IF NOT EXISTS pos_db;
+
+-- Switch to the new database
+USE pos_db;
+
+-- Create the inventory table
+-- This schema should match the core fields of your MongoDB documents.
+CREATE TABLE IF NOT EXISTS inventory (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_code VARCHAR(50) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    quantity INT NOT NULL,
+    org_id VARCHAR(255),  -- Storing ObjectId as a string
+    image VARCHAR(255)    -- Storing filename as a string
+);
+
+-- You would also need to create tables for users, sales, etc.
+-- For example:
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(80) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    org_id VARCHAR(255)
+);
+pip install pymongo
+pip install pymysql
