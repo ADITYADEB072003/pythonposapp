@@ -1,1 +1,12 @@
+# ... (other rules like __pycache__/)
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# Environment variables
 .env
+
+# ... (other rules)
